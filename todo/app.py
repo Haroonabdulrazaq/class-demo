@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, url_for, redirect
+from flask import Flask, jsonify, render_template, request, url_for, redirect
 from flask_sqlalchemy import SQLAlchemy
+import sys
 # from flask_migrate import Migrate
 
 
@@ -22,15 +23,23 @@ db.create_all()
 
 @app.route('/todos/create', methods=['POST', 'GET']) 
 def create_todo():
-  if request.method == 'POST':
-    description = request.form.get('description', '')
+  body ={}
+  error = False
+  try:
+    description = request.get_json()['description']
     todo = Todo(description=description)
     db.session.add(todo)
     db.session.commit()
-    return redirect(url_for('index'))
-  else:
-     user = request.args.get('description')
-     return render_template('index.html')
+    body['description']= todo.description
+  except:
+    error =True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+    if not error:
+      return jsonify(body)
+
 
 @app.route("/")
 def index():
