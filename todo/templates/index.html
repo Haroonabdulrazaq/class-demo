@@ -8,6 +8,11 @@
       .show {
         display: block;
       }
+      ul {
+    list-style: none;
+    padding:0;
+    margin: 0;
+}
     </style>
   </head>
   <body>
@@ -18,11 +23,34 @@
     </form>
     <ul id="todos">
         {%for d in data %}
-          <li> {{d.description}} </li>
+          <li> <input type="checkbox" class="check-completed" data-id="{{d.id}}" {% if d.completed %} checked {%endif%} /> {{d.description}} </li>
         {%endfor%}
     </ul>
 
     <script>
+      const checkboxes = document.querySelectorAll('.check-completed')
+      for(let i=0; i< checkboxes.length; i++){
+        const checkbox = checkboxes[i];
+        checkbox.onchange = function(e){
+          const newCompleted =  e.target.checked;
+          fetch('/todos/'+ todoId +'set-completed', {
+            method: 'POST',
+            body: JSON.stringify({
+              'completed': newCompleted
+            }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then((response)=>{
+            return response.json()
+          })
+          .then((checkedResponse)=>{
+            checkbox = checkedResponse['completed'];
+          })
+        }
+      }
+
       document.getElementById('form').onsubmit = function(e){
         e.preventDefault();
         let descriptionValue =  document.getElementById('description').value;
