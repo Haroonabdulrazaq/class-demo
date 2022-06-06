@@ -11,7 +11,7 @@
     </style>
   </head>
   <body>
-    <div class="hidden" id="error">Something went wrong</div>
+    <div id="error">Something went wrong</div>
     <form id="form">
       <input type="text" name="description" id="description" />
       <input type="submit" value="Create" />
@@ -49,6 +49,7 @@
         })
         .catch(function(){
           document.getElementById('error').classname='';
+          document.getElementById('error').classname='show';
         })
       }
     </script>
