@@ -1,3 +1,4 @@
+from email.policy import default
 from flask import Flask, jsonify, render_template, request, url_for, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate 
@@ -17,11 +18,12 @@ migrate = Migrate(app, db)
 class Todo(db.Model):
      id = db.Column(db.Integer, primary_key=True)
      description = db.Column(db.String, nullable=False)
+     completed = db.Column(db.String, nullable=False, default=False)
 
      def __repr__(self):
         return f'<Todo ID: {self.id}, name: {self.description}>'
 
-db.create_all()
+# db.create_all()
 
 
 @app.route('/todos/create', methods=['POST', 'GET']) 
