@@ -1,6 +1,9 @@
 from flask import Flask, jsonify, render_template, request, url_for, redirect
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate 
 import sys
+
+from sqlalchemy import false
 # from flask_migrate import Migrate
 
 
@@ -8,7 +11,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://haroon:haroon@localhost:5432/example'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-# migrate = Migrate(db, app)
+migrate = Migrate(app, db)
 
 
 class Todo(db.Model):
@@ -39,6 +42,24 @@ def create_todo():
     db.session.close()
     if not error:
       return jsonify(body)
+
+@app.route('/todos/<todo_id>/set-completed', methods=['POST','GET'])
+def set_completed_todo(todo_id):
+  body={}
+  error =False
+  try: 
+    completed = request.get_json()['completed']
+    todo = Todo(completed= completed)
+    db.session.add(todo)
+    db.session.commit()
+    body['completed'] = todo.completed
+  except:
+    error =True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+    return (url_for('index.html'))
 
 
 @app.route("/")
