@@ -2,6 +2,17 @@
   <head>
     <title>Todo App</title>
     <style>
+      #todos {
+        /* border: 1px solid red; */
+        padding: 1%;
+        width: 20%;
+      }
+      #cancel-btn{
+        border: 1px solid red;
+        cursor: pointer;
+        float: right;
+        font-size: 20px;
+      }
       .hidden {
         display: none;
       }
@@ -23,19 +34,54 @@
     </form>
     <ul id="todos">
         {%for d in data %}
-          <li> <input type="checkbox" class="check-completed" data-id="{{d.id}}" {% if d.completed %} checked {%endif%} /> {{d.description}} </li>
+          <li> 
+            <input type="checkbox" class="check-completed" data-id="{{d.id}}" {% if not d.completed %} checked {% endif %} /> {{d.description}}
+            <button id="cancel-btn" data-id="{{d.id}}">&cross;</button>
+          </li>
         {%endfor%}
     </ul>
 
     <script>
+
+      // Delete Content from the Table
+      const cancel_btns = document.querySelectorAll('#cancel-btn');
+      for(let i=0; i < cancel_btns.length; i++){
+        const cancel_btn = cancel_btns[i];
+        cancel_btn.onclick = function(e){
+          e.preventDefault()
+          const todoId = e.target.dataset['id']
+          console.log('todo ID', todoId);
+          fetch('/todos/'+todoId+'/delete', {
+            method: 'DELETE',
+            headers: {
+            'Content-Type': 'application/json'
+          }
+          }).then((response)=>{
+            console.log('I am here', response);
+            response.json();
+          }).then((jsonResponse)=>{
+            console.log('Json response', jsonResponse);
+          })
+          .catch(function() {
+            document.getElementById('error').className = '';
+          })
+        }
+      }
+
+      //Edit the completed check box
       const checkboxes = document.querySelectorAll('.check-completed')
       for(let i=0; i< checkboxes.length; i++){
         const checkbox = checkboxes[i];
-        checkbox.onchange = function(e){
-          // console.log('Event', e.target);
+        
+        checkbox.onchange = function(e) {
+
+          console.log('Event', e.target);
+
           const newCompleted =  e.target.checked;
-          const todoId = e.target.todo['id'];
-          fetch('/todos/'+ todoId +'set-completed', {
+          const todoId = e.target.dataset['id'];
+
+          console.log('Todo ID', todoId);
+          fetch('/todos/'+ todoId +'/set-completed', {
             method: 'POST',
             body: JSON.stringify({
               'completed': newCompleted
@@ -43,19 +89,16 @@
             headers: {
               'Content-Type': 'application/json'
             }
+          }).then(function() {
+            document.getElementById('error').className = 'hidden';
           })
-          .then((response)=>{
-            return response.json()
+          .catch(function() {
+            document.getElementById('error').className = '';
           })
-          .then((checkedResponse)=>{
-            checkbox = checkedResponse['completed'];
-          }) .catch(function(){
-            document.getElementById('error').classname='';
-            document.getElementById('error').classname='show';
-        })
         }
       }
 
+      // Add Data to the Table
       document.getElementById('form').onsubmit = function(e){
         e.preventDefault();
         let descriptionValue =  document.getElementById('description').value;
