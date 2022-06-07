@@ -15,15 +15,28 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 
+
+class TodoList(db.Model):
+  __tablename__ = 'todolist'
+  id= db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String(), nullable=False)
+  todo = db.relationship('Todo', backref='list', lazy=True)
+
+def __repr__(self):
+    return f'<TodoList {self.id} {self.name}>'
+
+
 class Todo(db.Model):
-     id = db.Column(db.Integer, primary_key=True)
-     description = db.Column(db.String, nullable=False)
-     completed = db.Column(db.String, nullable=False, default=False)
+  id = db.Column(db.Integer, primary_key=True)
+  description = db.Column(db.String, nullable=False)
+  completed = db.Column(db.String, nullable=False, default=False)
+  list_id = db.Column(db.Integer, db.ForeignKey('todolist.id'), nullable= False)
 
-     def __repr__(self):
-        return f'<Todo ID: {self.id}, name: {self.description}>'
+  def __repr__(self):
+    return f'<Todo ID: {self.id}, name: {self.description}>'
 
-# db.create_all()
+
+db.create_all()
 
 @app.route('/todos/<todo_id>/delete', methods=['DELETE'])
 def delete_todo(todo_id):
@@ -39,7 +52,7 @@ def delete_todo(todo_id):
     print(sys.exc_info())
   finally: 
     db.session.close()
-    return (url_for('index'))
+    return jsonify({ 'success': True })
 
 @app.route('/todos/<todo_id>/set-completed', methods=['POST','GET'])
 def set_completed_todo(todo_id):
