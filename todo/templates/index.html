@@ -11,7 +11,7 @@
         border: 1px solid red;
         cursor: pointer;
         float: right;
-        font-size: 20px;
+        font-size: 10px;
       }
       .hidden {
         display: none;
@@ -28,6 +28,11 @@
   </head>
   <body>
     <div id="error">Something went wrong</div>
+    <ul id="list">
+      {% for list in lists %}
+        <li> <a href="{{list.id}}"> {{list.name}}</a></li>
+      {% endfor %}
+    </ul>
     <form id="form">
       <input type="text" name="description" id="description" />
       <input type="submit" value="Create" />

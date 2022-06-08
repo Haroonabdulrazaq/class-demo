@@ -36,7 +36,7 @@ class Todo(db.Model):
     return f'<Todo ID: {self.id}, name: {self.description}>'
 
 
-db.create_all()
+# db.create_all()
 
 @app.route('/todos/<todo_id>/delete', methods=['DELETE'])
 def delete_todo(todo_id):
@@ -93,7 +93,14 @@ def create_todo():
       return jsonify(body)
 
 
+@app.route("/lists/<list_id>")
+def  get_list_todos(list_id):
+    return render_template('index.html',
+    lists = TodoList.query.all(),
+    data=Todo.query.filter_by(list_id=list_id).order_by('id').all())
+
+
 @app.route("/")
-def index():
-    return render_template('index.html', data=Todo.query.order_by('id').all())
+def  index():
+    return redirect(url_for('get_list_todos', list_id=1))
 
