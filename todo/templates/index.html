@@ -2,13 +2,11 @@
   <head>
     <title>Todo App</title>
     <style>
-      #todos {
-        /* border: 1px solid red; */
+      .todos {
         padding: 1%;
-        width: 20%;
+        width: 100%;
       }
       #cancel-btn{
-        border: 1px solid red;
         cursor: pointer;
         float: right;
         font-size: 10px;
@@ -19,32 +17,64 @@
       .show {
         display: block;
       }
-      ul {
-    list-style: none;
-    padding:0;
-    margin: 0;
-}
+    ul {
+      list-style: none;
+      padding:0;
+      margin: 0;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 40%;
+      min-height: 50vh;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .category {
+      margin-bottom: 5px;
+    }
+
+    .todos-form {
+      min-height: inherit;
+      min-width: inherit;
+
+    } 
     </style>
   </head>
   <body>
-    <div id="error">Something went wrong</div>
-    <ul id="list">
-      {% for list in lists %}
-        <li> <a href="{{list.id}}"> {{list.name}}</a></li>
-      {% endfor %}
-    </ul>
-    <form id="form">
-      <input type="text" name="description" id="description" />
-      <input type="submit" value="Create" />
-    </form>
-    <ul id="todos">
-        {%for d in data %}
-          <li> 
-            <input type="checkbox" class="check-completed" data-id="{{d.id}}" {% if not d.completed %} checked {% endif %} /> {{d.description}}
-            <button id="cancel-btn" data-id="{{d.id}}">&cross;</button>
-          </li>
-        {%endfor%}
-    </ul>
+    <!-- <div id="error">Something went wrong</div> -->
+    
+    <div class="container">
+      <ul class="list">
+        {% for list in lists %}
+          <li> <a class="category" href="{{list.id}}"> {{list.name}}</a></li>
+        {% endfor %}
+      </ul>
+      <div class="todos-form">
+        <h4>{{active_list.name}}</h4>
+        <form id="form">
+          <input type="text" name="description" id="description" />
+          <input type="submit" value="Create" />
+        </form>
+        <ul class="todos">
+            {%for d in data %}
+              <li> 
+                <input type="checkbox" class="check-completed" data-id="{{d.id}}" {% if not d.completed %} checked {% endif %} /> {{d.description}}
+                <button id="cancel-btn" data-id="{{d.id}}">&cross;</button>
+              </li>
+            {%endfor%}
+        </ul>
+      </div>
+    </div>
 
     <script>
 
