@@ -1,5 +1,5 @@
 from email.policy import default
-from flask import Flask, jsonify, render_template, request, url_for, redirect
+from flask import Flask, jsonify, render_template, request, url_for, redirect, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate 
 import sys
@@ -105,3 +105,70 @@ def  get_list_todos(list_id):
 def  index():
     return redirect(url_for('get_list_todos', list_id=1))
 
+@app.route('/lists/create', methods=['POST'])
+def create_list():
+    error = False
+    body = {}
+    try:
+      name = request.get_json()['name']
+      print('Goaning I am here', name)
+      todolist = TodoList(name=name)
+      db.session.add(todolist)
+      db.session.commit()
+      body['id'] = todolist.id
+      body['name'] = todolist.name
+      print('I am here', body)
+    except:
+      db.session.rollback()
+      error = True
+      print(sys.exc_info)
+    finally:
+      db.session.close()
+    if error:
+      abort(500)
+    else:
+      return jsonify(body)
+
+@app.route('/lists/<list_id>/delete', methods=['DELETE'])
+def delete_list(list_id):
+    error = False
+    try:
+      list = TodoList.query.get(list_id)
+      for todo in list.todos:
+        db.session.delete(todo)
+
+      db.session.delete(list)
+      db.session.commit()
+    except:
+      db.session.rollback()
+      error = True
+    finally:
+        db.session.close()
+    if error:
+      abort(500)
+    else:
+      return jsonify({'success': True})
+
+
+@app.route('/lists/<list_id>/set-completed', methods=['POST'])
+def set_completed_list(list_id):
+  error = False
+
+  try:
+    list = TodoList.query.get(list_id)
+
+    for todo in list.todos:
+        todo.completed = True
+
+    db.session.commit()
+  except:
+    db.session.rollback()
+
+    error = True
+  finally:
+        db.session.close()
+
+  if error:
+    abort(500)
+  else:
+    return '', 200
